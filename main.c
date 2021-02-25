@@ -61,11 +61,9 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    int yes = 1;
-    setsockopt(b_sock_fd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
 
     struct in_addr b_addr;
-    b_addr.s_addr = INADDR_ANY;
+    b_addr.s_addr = htonl(INADDR_ANY);
     struct sockaddr_in b_sock_addr;
     b_sock_addr.sin_family = AF_INET;
     b_sock_addr.sin_port = htons(B_PORT);
@@ -76,8 +74,11 @@ int main(int argc, char **argv) {
         close(b_sock_fd);
         exit(-1);
     }
-
-
+    struct sockaddr_in b_rec_addr;
+    char *b_buf = calloc(MAX_MESSAGE_SIZE, 1);
+    int b_addr_size = sizeof(b_rec_addr);
+    int b = recvfrom(b_sock_fd, b_buf, MAX_MESSAGE_SIZE, 0, (struct sockaddr * restrict)&b_rec_addr, (socklen_t * restrict)&b_addr_size);
+    puts(b_buf);
 
 
     while (1) {

@@ -9,13 +9,26 @@ int main(int argc, char **argv) {
 
     const struct sockaddr_in server_addr = {AF_INET, htons(PORT), inet_addr("127.0.0.1")};
 
+    int b_sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(b_sock_fd < 0) {
+        printf("Can't create socket\n");
+        return -1;
+    }
+
+    int yes = 1;
+    int res = setsockopt(b_sock_fd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
+    if(res == -1) {
+        perror("Setsockopt error");
+        exit(-1);
+    }
+
+
     struct in_addr b_addr;
-    b_addr.s_addr = INADDR_BROADCAST;
+    b_addr.s_addr = htonl(INADDR_BROADCAST);
     struct sockaddr_in b_sock_addr;
     b_sock_addr.sin_family = AF_INET;
     b_sock_addr.sin_port = htons(B_PORT);
     b_sock_addr.sin_addr = b_addr;
-
 
     if(argc < 2) {
         printf("Not enough arguments\n");
@@ -29,7 +42,7 @@ int main(int argc, char **argv) {
         strcat(buf, argv[2]);
     }
 
-    int b_sent = sendto(sock_fd, "Is anybody here?", strlen("Is anybody here?"), 0, (struct sockaddr*)&b_addr, sizeof(b_addr));
+    int b_sent = sendto(b_sock_fd, "Is anybody here?", strlen("Is anybody here?"), 0, (struct sockaddr*)&b_addr, sizeof(b_addr));
     if(b_sent < 0) {
         printf("Error while sending (broadcast)\n");
         return -1;
