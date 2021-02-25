@@ -3,7 +3,7 @@
 int main(int argc, char **argv) {
     int sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock_fd < 0) {
-        printf("Can't create socket");
+        printf("Can't create socket\n");
         return -1;
     }
 
@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     int yes = 1;
     int res = setsockopt(b_sock_fd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
     if(res == -1) {
-        perror("Setsockopt error");
+        perror("Setsockopt error\n");
         exit(-1);
     }
 
@@ -42,9 +42,12 @@ int main(int argc, char **argv) {
         strcat(buf, argv[2]);
     }
 
-    int b_sent = sendto(b_sock_fd, "Is anybody here?", strlen("Is anybody here?"), 0, (struct sockaddr*)&b_addr, sizeof(b_addr));
+    char *b_buf = calloc(MAX_MESSAGE_SIZE, 1);
+    strcpy(b_buf, "Is anybody here?");
+
+    int b_sent = sendto(b_sock_fd, b_buf, strlen(b_buf), 0, (struct sockaddr*)&b_addr, sizeof(b_addr));
     if(b_sent < 0) {
-        printf("Error while sending (broadcast)\n");
+        perror("Error while sending (broadcast)\n");
         return -1;
     }
 
